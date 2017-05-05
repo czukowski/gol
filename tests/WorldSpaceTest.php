@@ -86,11 +86,14 @@ class WorldSpaceTest extends Testcase
         $object->initialize($organisms, $worldDimension, $numberOfSpecies);
         $actualCells = $this->getObjectProperty($object, 'cells')
             ->getValue($object);
+        $actualWorldDimension = $this->getObjectProperty($object, 'worldDimension')
+            ->getValue($object);
         $actualNumberOfSpecies = $this->getObjectProperty($object, 'numberOfSpecies')
             ->getValue($object);
         $actualInitialized = $this->getObjectProperty($object, 'initialized')
             ->getValue($object);
-        $this->assertSame(count($actualCells), $worldDimension, "World dimensions");
+        $this->assertSame($worldDimension, count($actualCells), "World dimensions by cell rows count");
+        $this->assertSame($worldDimension, $actualWorldDimension, "World dimensions cached value");
         $this->assertSame($numberOfSpecies, $actualNumberOfSpecies, "Number of species types");
         $this->assertTrue($actualInitialized, "Initialized state");
         $getExpectedOrganismType = function ($x, $y) use ($organisms) {
@@ -292,6 +295,8 @@ class WorldSpaceTest extends Testcase
         if ($cells !== NULL) {
             $this->getObjectProperty($object, 'cells')
                 ->setValue($object, $cells);
+            $this->getObjectProperty($object, 'worldDimension')
+                ->setValue($object, count($cells));
         }
         if ($numberOfSpecies !== NULL) {
             $this->getObjectProperty($object, 'numberOfSpecies')

@@ -22,6 +22,10 @@ class WorldSpace
      * @var  integer
      */
     private $numberOfSpecies;
+    /**
+     * @var  integer
+     */
+    private $worldDimension;
 
     /**
      * @param   integer  $x
@@ -61,6 +65,7 @@ class WorldSpace
                 throw new InvalidArgumentException("Arguments 2 to 3 must be positive integers");
             }
         }
+        $this->worldDimension = $worldDimension;
         $this->numberOfSpecies = $numberOfSpecies;
         $this->cells = array_fill(0, $worldDimension, array_fill(0, $worldDimension, 0));
         foreach ($organisms as $i => $organism) {
@@ -99,16 +104,15 @@ class WorldSpace
     public function save(WorldWriterInterface $destination, $numberOfIterations)
     {
         $this->checkInitialized("Cannot save uninitialized world");
-        $worldDimension = count($this->cells);
         $organisms = [];
-        for ($y = 0; $y < $worldDimension; $y++) {
-            for ($x = 0; $x < $worldDimension; $x++) {
+        for ($y = 0; $y < $this->worldDimension; $y++) {
+            for ($x = 0; $x < $this->worldDimension; $x++) {
                 if ($this->cells[$y][$x] > 0) {
                     $organisms[] = new Organism($x, $y, $this->cells[$y][$x]);
                 }
             }
         }
-        $destination->write($organisms, $worldDimension, $numberOfIterations, $this->numberOfSpecies);
+        $destination->write($organisms, $this->worldDimension, $numberOfIterations, $this->numberOfSpecies);
     }
 
     /**
@@ -130,12 +134,11 @@ class WorldSpace
      */
     private function checkPosition($x, $y, $message = NULL)
     {
-        $worldDimension = count($this->cells);
         foreach ([$x, $y] as $i => $position) {
-            if ($position < 0 || $position >= $worldDimension) {
+            if ($position < 0 || $position >= $this->worldDimension) {
                 $letter = $i === 0 ? 'X' : 'Y';
                 $message = $message ? : "Invalid position";
-                $width = $worldDimension - 1;
+                $width = $this->worldDimension - 1;
                 throw new InvalidArgumentException("$message, allowed $letter range is [0..$width]");
             }
         }
