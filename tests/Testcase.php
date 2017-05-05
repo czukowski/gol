@@ -10,7 +10,7 @@ use Exception,
  * 
  * @author  czukowski
  */
-class Testcase extends PHPUnit_Framework_TestCase
+abstract class Testcase extends PHPUnit_Framework_TestCase
 {
     /**
      * @param   string  $filename
