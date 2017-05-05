@@ -22,10 +22,6 @@ class WorldSpace
      * @var  integer
      */
     private $numberOfSpecies;
-    /**
-     * @var  integer
-     */
-    private $numberOfIterations;
 
     /**
      * @param   integer  $x
@@ -55,18 +51,16 @@ class WorldSpace
     /**
      * @param   array    $organisms
      * @param   integer  $worldDimension
-     * @param   integer  $numberOfIterations
      * @param   integer  $numberOfSpecies
      * @throws  InvalidArgumentException
      */
-    public function initialize(array $organisms, $worldDimension, $numberOfIterations, $numberOfSpecies)
+    public function initialize(array $organisms, $worldDimension, $numberOfSpecies)
     {
-        foreach ([$worldDimension, $numberOfIterations, $numberOfSpecies] as $value) {
+        foreach ([$worldDimension, $numberOfSpecies] as $value) {
             if ( ! is_int($value) || $value <= 0) {
-                throw new InvalidArgumentException("Arguments 2 to 4 must be positive integers");
+                throw new InvalidArgumentException("Arguments 2 to 3 must be positive integers");
             }
         }
-        $this->numberOfIterations = $numberOfIterations;
         $this->numberOfSpecies = $numberOfSpecies;
         $this->cells = array_fill(0, $worldDimension, array_fill(0, $worldDimension, 0));
         foreach ($organisms as $i => $organism) {
@@ -94,15 +88,15 @@ class WorldSpace
         $this->initialize(
             $source->getOrganismsList(),
             $source->getWorldDimension(),
-            $source->getNumberOfIterations(),
             $source->getNumberOfSpecies()
         );
     }
 
     /**
      * @param  WorldWriterInterface  $destination
+     * @param  integer               $numberOfIterations
      */
-    public function save(WorldWriterInterface $destination)
+    public function save(WorldWriterInterface $destination, $numberOfIterations)
     {
         $this->checkInitialized("Cannot save uninitialized world");
         $worldDimension = count($this->cells);
@@ -114,7 +108,7 @@ class WorldSpace
                 }
             }
         }
-        $destination->write($organisms, $worldDimension, $this->numberOfIterations, $this->numberOfSpecies);
+        $destination->write($organisms, $worldDimension, $numberOfIterations, $this->numberOfSpecies);
     }
 
     /**

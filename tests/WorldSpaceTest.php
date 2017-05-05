@@ -27,7 +27,7 @@ class WorldSpaceTest extends Testcase
      */
     public function testGetAt($cells, $initialized, $x, $y, $expected)
     {
-        $object = $this->createObject($cells, NULL, NULL, $initialized);
+        $object = $this->createObject($cells, NULL, $initialized);
         $this->expectExceptionFromArgument($expected);
         $actual = $object->getAt($x, $y);
         $this->assertSame($expected, $actual);
@@ -52,7 +52,7 @@ class WorldSpaceTest extends Testcase
      */
     public function testSetAt($cells, $numberOfSpecies, $initialized, $x, $y, $value, $expected)
     {
-        $object = $this->createObject($cells, NULL, $numberOfSpecies, $initialized);
+        $object = $this->createObject($cells, $numberOfSpecies, $initialized);
         $this->expectExceptionFromArgument($expected);
         $object->setAt($x, $y, $value);
         $actualCells = $this->getObjectProperty($object, 'cells')
@@ -79,21 +79,18 @@ class WorldSpaceTest extends Testcase
     /**
      * @dataProvider  provideInitialize
      */
-    public function testInitialize($organisms, $worldDimension, $numberOfIterations, $numberOfSpecies, $expectedError)
+    public function testInitialize($organisms, $worldDimension, $numberOfSpecies, $expectedError)
     {
         $object = $this->createObject();
         $this->expectExceptionFromArgument($expectedError);
-        $object->initialize($organisms, $worldDimension, $numberOfIterations, $numberOfSpecies);
+        $object->initialize($organisms, $worldDimension, $numberOfSpecies);
         $actualCells = $this->getObjectProperty($object, 'cells')
-            ->getValue($object);
-        $actualNumberOfIterations = $this->getObjectProperty($object, 'numberOfIterations')
             ->getValue($object);
         $actualNumberOfSpecies = $this->getObjectProperty($object, 'numberOfSpecies')
             ->getValue($object);
         $actualInitialized = $this->getObjectProperty($object, 'initialized')
             ->getValue($object);
         $this->assertSame(count($actualCells), $worldDimension, "World dimensions");
-        $this->assertSame($numberOfIterations, $actualNumberOfIterations, "Number of iterations");
         $this->assertSame($numberOfSpecies, $actualNumberOfSpecies, "Number of species types");
         $this->assertTrue($actualInitialized, "Initialized state");
         $getExpectedOrganismType = function ($x, $y) use ($organisms) {
@@ -123,24 +120,21 @@ class WorldSpaceTest extends Testcase
                     new Organism(10, 0, 2),
                     new Organism(10, 1, 3),
                 ],
-                100, 5000000, 3,
+                100, 3,
                 NULL,
             ],
             'ZeroWorldDimension' => [
-                [], 0, 5000000, 3, new InvalidArgumentException,
-            ],
-            'IterationsNotInteger' => [
-                [], 100, '5000000.0', 3, new InvalidArgumentException,
+                [], 0, 3, new InvalidArgumentException,
             ],
             'NumberOfSpeciesNotInteger' => [
-                [], 100, 5000000, 3.14, new InvalidArgumentException,
+                [], 100, 3.14, new InvalidArgumentException,
             ],
             'TooLowXPosition' => [
                 [
                     new Organism(0, 0, 1),
                     new Organism(-1, 0, 1),
                 ],
-                100, 5000000, 3,
+                100, 3,
                 new InvalidArgumentException,
             ],
             'TooLowYPosition' => [
@@ -148,7 +142,7 @@ class WorldSpaceTest extends Testcase
                     new Organism(0, 0, 1),
                     new Organism(10, -1, 1),
                 ],
-                100, 5000000, 3,
+                100, 3,
                 new InvalidArgumentException,
             ],
             'TooLowSpeciesNumber' => [
@@ -156,7 +150,7 @@ class WorldSpaceTest extends Testcase
                     new Organism(0, 0, 1),
                     new Organism(1, 1, 0),
                 ],
-                100, 5000000, 3,
+                100, 3,
                 new InvalidArgumentException,
             ],
             'TooHighXPosition' => [
@@ -164,7 +158,7 @@ class WorldSpaceTest extends Testcase
                     new Organism(0, 0, 1),
                     new Organism(100, 0, 1),
                 ],
-                100, 5000000, 3,
+                100, 3,
                 new InvalidArgumentException,
             ],
             'TooHighYPosition' => [
@@ -172,7 +166,7 @@ class WorldSpaceTest extends Testcase
                     new Organism(0, 0, 1),
                     new Organism(0, 100, 1),
                 ],
-                100, 5000000, 3,
+                100, 3,
                 new InvalidArgumentException,
             ],
             'TooHighSpeciesNumber' => [
@@ -180,7 +174,7 @@ class WorldSpaceTest extends Testcase
                     new Organism(0, 0, 1),
                     new Organism(0, 1, 4),
                 ],
-                100, 5000000, 3,
+                100, 3,
                 new InvalidArgumentException,
             ],
             'PositionAlreadyOccupied' => [
@@ -188,7 +182,7 @@ class WorldSpaceTest extends Testcase
                     new Organism(10, 10, 1),
                     new Organism(10, 10, 1),
                 ],
-                100, 5000000, 3,
+                100, 3,
                 new InvalidArgumentException,
             ],
         ];
@@ -197,15 +191,15 @@ class WorldSpaceTest extends Testcase
     /**
      * @dataProvider  provideLoad
      */
-    public function testLoad($organisms, $worldDimension, $numberOfIterations, $numberOfSpecies)
+    public function testLoad($organisms, $worldDimension, $numberOfSpecies)
     {
         $object = $this->getMockBuilder(WorldSpace::class)
             ->setMethodsExcept(['load'])
             ->getMock();
         $object->expects($this->once())
             ->method('initialize')
-            ->with($organisms, $worldDimension, $numberOfIterations, $numberOfSpecies);
-        $reader = $this->createWorldReader($organisms, $worldDimension, $numberOfIterations, $numberOfSpecies);
+            ->with($organisms, $worldDimension, $numberOfSpecies);
+        $reader = $this->createWorldReader($organisms, $worldDimension, $numberOfSpecies);
         $object->load($reader);
     }
 
@@ -220,7 +214,7 @@ class WorldSpaceTest extends Testcase
                     new Organism(10, 0, 2),
                     new Organism(10, 1, 3),
                 ],
-                100, 5000000, 3,
+                100, 3,
             ],
         ];
     }
@@ -250,9 +244,9 @@ class WorldSpaceTest extends Testcase
         $writer->expects($expected instanceof Exception ? $this->never() : $this->once())
             ->method('write')
             ->with($this->callback($callbackOrganisms), $worldDimension, $numberOfIterations, $numberOfSpecies);
-        $object = $this->createObject($cells, $numberOfIterations, $numberOfSpecies, $initialized);
+        $object = $this->createObject($cells, $numberOfSpecies, $initialized);
         $this->expectExceptionFromArgument($expected);
-        $object->save($writer);
+        $object->save($writer, $numberOfIterations);
     }
 
     public function provideSave()
@@ -292,16 +286,12 @@ class WorldSpaceTest extends Testcase
      * @param   boolean  $initialized
      * @return  WorldSpace
      */
-    private function createObject($cells = NULL, $numberOfIterations = NULL, $numberOfSpecies = NULL, $initialized = NULL)
+    private function createObject($cells = NULL, $numberOfSpecies = NULL, $initialized = NULL)
     {
         $object = new WorldSpace;
         if ($cells !== NULL) {
             $this->getObjectProperty($object, 'cells')
                 ->setValue($object, $cells);
-        }
-        if ($numberOfIterations !== NULL) {
-            $this->getObjectProperty($object, 'numberOfIterations')
-                ->setValue($object, $numberOfIterations);
         }
         if ($numberOfSpecies !== NULL) {
             $this->getObjectProperty($object, 'numberOfSpecies')
@@ -317,7 +307,7 @@ class WorldSpaceTest extends Testcase
     /**
      * @return  WorldReaderInterface
      */
-    private function createWorldReader($organisms, $worldDimension, $numberOfIterations, $numberOfSpecies)
+    private function createWorldReader($organisms, $worldDimension, $numberOfSpecies)
     {
         $reader = $this->createMock(WorldReaderInterface::class);
         $reader->expects($this->once())
@@ -326,9 +316,6 @@ class WorldSpaceTest extends Testcase
         $reader->expects($this->once())
             ->method('getWorldDimension')
             ->will($this->returnValue($worldDimension));
-        $reader->expects($this->once())
-            ->method('getNumberOfIterations')
-            ->will($this->returnValue($numberOfIterations));
         $reader->expects($this->once())
             ->method('getNumberOfSpecies')
             ->will($this->returnValue($numberOfSpecies));
