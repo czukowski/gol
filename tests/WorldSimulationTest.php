@@ -30,9 +30,16 @@ class WorldSimulationTest extends Testcase
     public function testIterateIntegration($cells, $numberOfIterations, $expected)
     {
         $world = $this->createWorldFromCells($cells);
-        $object = $this->createObject();
+        $object = $this->getMockBuilder(WorldSimulation::class)
+            ->setMethods(['resolveBirthRights'])
+            ->getMock();
+        $object->expects($this->any())
+            ->method('resolveBirthRights')
+            ->will($this->returnCallback(function (array $elements) {
+                return reset($elements);
+            }));
         $object->iterateWorld($world, $numberOfIterations);
-        $this->assertSame($expected, $this->cells);
+        $this->assertEquals($expected, $this->cells);
     }
 
     public function provideIterateIntegration()
@@ -41,31 +48,31 @@ class WorldSimulationTest extends Testcase
             [
                 self::$smallWorld, 1,
                 [
-                    [2, 0, 0, 0, 0],
-                    [0, 0, 1, 1, 0],
-                    [0, 1, 0, 1, 0],
-                    [0, 1, 1, 0, 0],
-                    [0, 0, 0, 0, 3],
+                    [2, 2, 0, 1, 0],
+                    [2, 2, 0, 0, 1],
+                    [0, 0, 0, 0, 0],
+                    [1, 0, 0, 1, 3],
+                    [0, 1, 0, 3, 3],
                 ],
             ],
             [
                 self::$smallWorld, 2,
                 [
+                    [2, 2, 0, 0, 0],
+                    [2, 2, 0, 0, 0],
                     [0, 0, 0, 0, 0],
-                    [0, 0, 0, 1, 0],
-                    [0, 0, 0, 0, 0],
-                    [0, 1, 0, 0, 0],
-                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 3],
+                    [0, 0, 0, 3, 3],
                 ],
             ],
             [
                 self::$smallWorld, 3,
                 [
+                    [2, 2, 0, 0, 0],
+                    [2, 2, 0, 0, 0],
                     [0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 3, 3],
+                    [0, 0, 0, 3, 3],
                 ],
             ],
         ];
@@ -220,11 +227,11 @@ class WorldSimulationTest extends Testcase
     public function provideGetNeighborCountsOf()
     {
         return [
-            [self::$smallWorld, 0, 0, [2 => 2]],
-            [self::$smallWorld, 1, 1, [2 => 2, 1 => 2]],
-            [self::$smallWorld, 2, 2, [1 => 4]],
-            [self::$smallWorld, 0, 3, [1 => 2, 0 => 1]],
-            [self::$smallWorld, 4, 4, [3 => 2]],
+            [self::$smallWorld, 0, 0, [2 => 2, 0 => 1]],
+            [self::$smallWorld, 1, 1, [2 => 3, 1 => 3, 0 => 2]],
+            [self::$smallWorld, 2, 2, [1 => 6, 0 => 2]],
+            [self::$smallWorld, 0, 3, [1 => 3, 0 => 2]],
+            [self::$smallWorld, 4, 4, [3 => 2, 0 => 1]],
         ];
     }
 
@@ -243,11 +250,11 @@ class WorldSimulationTest extends Testcase
     public function provideGetNeighborsOf()
     {
         return [
-            [self::$smallWorld, 0, 0, [2, 2]],
-            [self::$smallWorld, 1, 1, [2, 1, 2, 1]],
-            [self::$smallWorld, 2, 2, [1, 1, 1, 1]],
-            [self::$smallWorld, 0, 3, [1, 0, 1]],
-            [self::$smallWorld, 4, 4, [3, 3]],
+            [self::$smallWorld, 0, 0, [2, 2, 0]],
+            [self::$smallWorld, 1, 1, [2, 1, 2, 1, 2, 0, 0, 1]],
+            [self::$smallWorld, 2, 2, [1, 1, 1, 1, 0, 1, 1, 0]],
+            [self::$smallWorld, 0, 3, [1, 0, 1, 1, 0]],
+            [self::$smallWorld, 4, 4, [3, 3, 0]],
         ];
     }
 
