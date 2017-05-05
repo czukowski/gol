@@ -5,12 +5,77 @@ use Exception,
     LogicException;
 
 /**
- * WorldSimulationTest
+ * WorldSpaceTest
  * 
  * @author  czukowski
  */
-class WorldSimulationTest extends Testcase
+class WorldSpaceTest extends Testcase
 {
+    /**
+     * @var  array
+     */
+    private static $smallWorld = [
+        [0, 0, 0, 0, 1],
+        [0, 0, 0, 1, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+    ];
+
+    /**
+     * @dataProvider  provideGetAt
+     */
+    public function testGetAt($cells, $initialized, $x, $y, $expected)
+    {
+        $object = $this->createObject($cells, NULL, NULL, $initialized);
+        $this->expectExceptionFromArgument($expected);
+        $actual = $object->getAt($x, $y);
+        $this->assertSame($expected, $actual);
+    }
+
+    public function provideGetAt()
+    {
+        return [
+            '0,0' => [self::$smallWorld, TRUE, 0, 0, 0],
+            '0,4' => [self::$smallWorld, TRUE, 0, 4, 1],
+            '2,2' => [self::$smallWorld, TRUE, 2, 2, 1],
+            'UninitializedWorld' => [self::$smallWorld, FALSE, 0, 0, new LogicException],
+            'TooLowXPosition' => [self::$smallWorld, TRUE, -1, 0, new InvalidArgumentException],
+            'TooHighXPosition' => [self::$smallWorld, TRUE, 5, 0, new InvalidArgumentException],
+            'TooLowYPosition' => [self::$smallWorld, TRUE, 0, -1, new InvalidArgumentException],
+            'TooHighYPosition' => [self::$smallWorld, TRUE, 0, 5, new InvalidArgumentException],
+        ];
+    }
+
+    /**
+     * @dataProvider  provideSetAt
+     */
+    public function testSetAt($cells, $numberOfSpecies, $initialized, $x, $y, $value, $expected)
+    {
+        $object = $this->createObject($cells, NULL, $numberOfSpecies, $initialized);
+        $this->expectExceptionFromArgument($expected);
+        $object->setAt($x, $y, $value);
+        $actualCells = $this->getObjectProperty($object, 'cells')
+            ->getValue($object);
+        $this->assertSame($expected, $actualCells[$y][$x]);
+    }
+
+    public function provideSetAt()
+    {
+        return [
+            '0,0' => [self::$smallWorld, 1, TRUE, 0, 0, 1, 1],
+            '0,4' => [self::$smallWorld, 1, TRUE, 0, 4, 1, 1],
+            '2,2' => [self::$smallWorld, 1, TRUE, 2, 2, 0, 0],
+            'UninitializedWorld' => [self::$smallWorld, 1, FALSE, 0, 0, 1, new LogicException],
+            'TooLowXPosition' => [self::$smallWorld, 1, TRUE, -1, 0, 1, new InvalidArgumentException],
+            'TooHighXPosition' => [self::$smallWorld, 1, TRUE, 5, 0, 1, new InvalidArgumentException],
+            'TooLowYPosition' => [self::$smallWorld, 1, TRUE, 0, -1, 1, new InvalidArgumentException],
+            'TooHighYPosition' => [self::$smallWorld, 1, TRUE, 0, 5, 1, new InvalidArgumentException],
+            'TooLowSpeciesNumber' => [self::$smallWorld, 1, TRUE, 2, 2, -1, new InvalidArgumentException],
+            'TooHighSpeciesNumber' => [self::$smallWorld, 1, TRUE, 2, 2, 2, new InvalidArgumentException],
+        ];
+    }
+
     /**
      * @dataProvider  provideInitialize
      */
@@ -134,7 +199,7 @@ class WorldSimulationTest extends Testcase
      */
     public function testLoad($organisms, $worldDimension, $numberOfIterations, $numberOfSpecies)
     {
-        $object = $this->getMockBuilder(WorldSimulation::class)
+        $object = $this->getMockBuilder(WorldSpace::class)
             ->setMethodsExcept(['load'])
             ->getMock();
         $object->expects($this->once())
@@ -185,15 +250,7 @@ class WorldSimulationTest extends Testcase
         $writer->expects($expected instanceof Exception ? $this->never() : $this->once())
             ->method('write')
             ->with($this->callback($callbackOrganisms), $worldDimension, $numberOfIterations, $numberOfSpecies);
-        $object = $this->createObject();
-        $this->getObjectProperty($object, 'initialized')
-            ->setValue($object, $initialized);
-        $this->getObjectProperty($object, 'cells')
-            ->setValue($object, $cells);
-        $this->getObjectProperty($object, 'numberOfIterations')
-            ->setValue($object, $numberOfIterations);
-        $this->getObjectProperty($object, 'numberOfSpecies')
-            ->setValue($object, $numberOfSpecies);
+        $object = $this->createObject($cells, $numberOfIterations, $numberOfSpecies, $initialized);
         $this->expectExceptionFromArgument($expected);
         $object->save($writer);
     }
@@ -229,11 +286,32 @@ class WorldSimulationTest extends Testcase
     }
 
     /**
-     * @return  WorldSimulation
+     * @param   array    $cells
+     * @param   integer  $numberOfIterations
+     * @param   integer  $numberOfSpecies
+     * @param   boolean  $initialized
+     * @return  WorldSpace
      */
-    private function createObject()
+    private function createObject($cells = NULL, $numberOfIterations = NULL, $numberOfSpecies = NULL, $initialized = NULL)
     {
-        return new WorldSimulation;
+        $object = new WorldSpace;
+        if ($cells !== NULL) {
+            $this->getObjectProperty($object, 'cells')
+                ->setValue($object, $cells);
+        }
+        if ($numberOfIterations !== NULL) {
+            $this->getObjectProperty($object, 'numberOfIterations')
+                ->setValue($object, $numberOfIterations);
+        }
+        if ($numberOfSpecies !== NULL) {
+            $this->getObjectProperty($object, 'numberOfSpecies')
+                ->setValue($object, $numberOfSpecies);
+        }
+        if ($initialized !== NULL) {
+            $this->getObjectProperty($object, 'initialized')
+                ->setValue($object, $initialized);
+        }
+        return $object;
     }
 
     /**
