@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<life>
+    <world>
+        <cells>3.14</cells>
+        <species/>
+        <iterations>four millions</iterations>
+    </world>
+    <organisms/>
+</life>

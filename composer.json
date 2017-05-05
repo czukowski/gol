@@ -1,0 +1,19 @@
+{
+    "name": "czukowski/game-of-life",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Cz\\GoL\\": "classes"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Cz\\GoL\\": "tests"
+        }
+    },
+    "require-dev": {
+        "adlawson/vfs": "*",
+        "phpunit/phpunit": "~5.7"
+    }
+}
