@@ -3,6 +3,7 @@ namespace Cz\GoL;
 use Exception,
     PHPUnit_Framework_TestCase,
     ReflectionClass,
+    ReflectionMethod,
     ReflectionProperty;
 
 /**
@@ -29,6 +30,18 @@ abstract class Testcase extends PHPUnit_Framework_TestCase
         $class = new ReflectionClass($this);
         $path = $class->getFileName();
         return dirname($path).'/'.basename($path, '.php').'/';
+    }
+
+    /**
+     * @param   object  $object
+     * @param   string  $name
+     * @return  ReflectionMethod
+     */
+    protected function getObjectMethod($object, $name)
+    {
+        $method = new ReflectionMethod($object, $name);
+        $method->setAccessible(TRUE);
+        return $method;
     }
 
     /**

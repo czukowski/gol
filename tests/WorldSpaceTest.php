@@ -77,6 +77,23 @@ class WorldSpaceTest extends Testcase
     }
 
     /**
+     * @dataProvider  provideDimension
+     */
+    public function getDimension($worldDimension) {
+        $object = $this->createObject();
+        $this->getObjectProperty($object, 'worldDimension')
+            ->setValue($object, $worldDimension);
+        $actual = $object->getDimension();
+        $this->assertSame($worldDimension, $actual);
+    }
+
+    public function provideDimension() {
+        return [
+            [100],
+        ];
+    }
+
+    /**
      * @dataProvider  provideInitialize
      */
     public function testInitialize($organisms, $worldDimension, $numberOfSpecies, $expectedError)

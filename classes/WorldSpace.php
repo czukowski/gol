@@ -53,6 +53,15 @@ class WorldSpace
     }
 
     /**
+     * @return  integer
+     */
+    public function getDimension()
+    {
+        $this->checkInitialized();
+        return $this->worldDimension;
+    }
+
+    /**
      * @param   array    $organisms
      * @param   integer  $worldDimension
      * @param   integer  $numberOfSpecies
