@@ -12,15 +12,22 @@ class WorldSimulation
     /**
      * @param   WorldSpace  $world
      * @param   integer     $numberOfIterations
+     * @param   callable    $onIteration
      * @throws  InvalidArgumentException
      */
-    public function iterateWorld(WorldSpace $world, $numberOfIterations)
+    public function iterateWorld(WorldSpace $world, $numberOfIterations, $onIteration = NULL)
     {
         if ( ! is_int($numberOfIterations) || $numberOfIterations <= 0) {
             throw new InvalidArgumentException('Number of iterations must be positive integer');
         }
+        if ($onIteration !== NULL && ! is_callable($onIteration)) {
+            throw new InvalidArgumentException('On iteration must be callback or NULL');
+        }
         do {
             $this->iterateWorldOnce($world);
+            if ($onIteration !== NULL) {
+                call_user_func($onIteration, $world, $numberOfIterations - 1);
+            }
         }
         while (--$numberOfIterations > 0);
     }

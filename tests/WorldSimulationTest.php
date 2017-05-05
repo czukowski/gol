@@ -81,7 +81,7 @@ class WorldSimulationTest extends Testcase
     /**
      * @dataProvider  provideIterateWorld
      */
-    public function testIterateWorld($numberOfIterations)
+    public function testIterateWorld($numberOfIterations, $withCallback)
     {
         $world = $this->createMock(WorldSpace::class);
         $object = $this->getMockBuilder(WorldSimulation::class)
@@ -90,13 +90,24 @@ class WorldSimulationTest extends Testcase
         $object->expects($this->exactly($numberOfIterations))
             ->method('iterateWorldOnce')
             ->with($world);
-        $object->iterateWorld($world, $numberOfIterations);
+        $callback = NULL;
+        if ($withCallback) {
+            $onIterationSpy = $this->getMockBuilder('stdClass')
+                ->setMethods(['onIteration'])
+                ->getMock();
+            $onIterationSpy->expects($this->exactly($numberOfIterations))
+                ->method('onIteration')
+                ->with($world);
+            $callback = [$onIterationSpy, 'onIteration'];
+        }
+        $object->iterateWorld($world, $numberOfIterations, $callback);
     }
 
     public function provideIterateWorld()
     {
         return [
-            [100],
+            [100, FALSE],
+            [100, TRUE],
         ];
     }
 
@@ -118,6 +129,27 @@ class WorldSimulationTest extends Testcase
             [-1],
             [3.14],
             ['fifty five'],
+        ];
+    }
+
+    /**
+     * @dataProvider  provideIterateWorldInvalidCallback
+     */
+    public function testIterateWorldInvalidCallback($onIteration)
+    {
+        $object = $this->createObject();
+        $world = $this->createMock(WorldSpace::class);
+        $this->expectException(InvalidArgumentException::class);
+        $object->iterateWorld($world, 100, $onIteration);
+    }
+
+    public function provideIterateWorldInvalidCallback()
+    {
+        return [
+            [FALSE],
+            [-1],
+            [3.14],
+            ['lets_hope_this_function_does_not_exist'],
         ];
     }
 
