@@ -7,6 +7,9 @@
             "Cz\\GoL\\": "classes"
         }
     },
+    "require": {
+        "php": ">= 5.6"
+    },
     "autoload-dev": {
         "psr-4": {
             "Cz\\GoL\\": "tests"
