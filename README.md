@@ -1,7 +1,7 @@
 Game of Life, of sorts
 ======================
 
-A simple simulation, not unlike you may have seen in a [Darwinia intro][darwinia] intro,
+A simple simulation, not unlike you may have seen in a [Darwinia intro][darwinia],
 this one here is written in PHP and has a different set of rules.
 
 To run, use the following command:
