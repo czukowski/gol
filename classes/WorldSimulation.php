@@ -48,6 +48,8 @@ class WorldSimulation
                 }
             }
         }
+        // Apply all changes in a separate step so that the earlier change in
+        // an iteration will not affect another one in the same iteration.
         foreach ($evolution as $change) {
             list ($x, $y, $type) = $change;
             $world->setAt($x, $y, $type);
