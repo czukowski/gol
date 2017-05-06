@@ -12,10 +12,6 @@ class WorldSimulationTest extends Testcase
     /**
      * @var  array
      */
-    private $cells;
-    /**
-     * @var  array
-     */
     private static $smallWorld = [
         [2, 2, 0, 0, 1],
         [2, 0, 1, 1, 0],
@@ -29,7 +25,15 @@ class WorldSimulationTest extends Testcase
      */
     public function testIterateIntegration($cells, $numberOfIterations, $expected)
     {
-        $world = $this->createWorldFromCells($cells);
+        $world = new WorldSpace;
+        $this->getObjectProperty($world, 'cells')
+            ->setValue($world, $cells);
+        $this->getObjectProperty($world, 'worldDimension')
+            ->setValue($world, count($cells));
+        $this->getObjectProperty($world, 'numberOfSpecies')
+            ->setValue($world, max(array_map(function ($row) { return max($row); }, $cells)));
+        $this->getObjectProperty($world, 'initialized')
+            ->setValue($world, TRUE);
         $object = $this->getMockBuilder(WorldSimulation::class)
             ->setMethods(['resolveBirthRights'])
             ->getMock();
@@ -39,7 +43,9 @@ class WorldSimulationTest extends Testcase
                 return reset($elements);
             }));
         $object->iterateWorld($world, $numberOfIterations);
-        $this->assertEquals($expected, $this->cells);
+        $actual = $this->getObjectProperty($world, 'cells')
+            ->getValue($world);
+        $this->assertEquals($expected, $actual);
     }
 
     public function provideIterateIntegration()
@@ -308,13 +314,8 @@ class WorldSimulationTest extends Testcase
         $world = $this->createMock(WorldSpace::class);
         $world->expects($this->any())
             ->method('getAt')
-            ->will($this->returnCallback(function ($x, $y) {
-                return $this->cells[$y][$x];
-            }));
-        $world->expects($this->any())
-            ->method('setAt')
-            ->will($this->returnCallback(function ($x, $y, $value) {
-                $this->cells[$y][$x] = $value;
+            ->will($this->returnCallback(function ($x, $y) use ($cells) {
+                return $cells[$y][$x];
             }));
         $world->expects($this->any())
             ->method('getDimension')
