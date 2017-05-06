@@ -1,5 +1,6 @@
 <?php
-namespace Cz\GoL;
+namespace Cz\GoL\NeighborsLocation;
+use Cz\GoL\WorldSpace;
 
 /**
  * NeighborsInterface

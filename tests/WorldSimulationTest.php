@@ -1,6 +1,7 @@
 <?php
 namespace Cz\GoL;
-use InvalidArgumentException;
+use Cz\GoL\NeighborsLocation\NeighborsInterface,
+    InvalidArgumentException;
 
 /**
  * WorldSimulationTest
@@ -24,7 +25,7 @@ class WorldSimulationTest extends Testcase
         $this->getObjectProperty($world, 'initialized')
             ->setValue($world, TRUE);
         $evolutionRules = $this->createDefaultEvolutionRules($this->any());
-        $object = $this->createObject(new NeighborsFrom8Points, $evolutionRules);
+        $object = $this->createObject(new NeighborsLocation\From8Points, $evolutionRules);
         $object->iterateWorld($world, $numberOfIterations);
         $actual = $this->getObjectProperty($world, 'cells')
             ->getValue($world);
@@ -239,7 +240,7 @@ class WorldSimulationTest extends Testcase
     {
         // One rule is mocked to avoid probability function in tests.
         // The respective tests will set the correct return values.
-        $giveBirthRule = $this->getMockBuilder(GiveBirthRule::class)
+        $giveBirthRule = $this->getMockBuilder(EvolutionRules\GiveBirth::class)
             ->setMethods(['resolveBirthRights'])
             ->getMock();
         $giveBirthRule->expects($giveBirthExpectation)
@@ -248,9 +249,9 @@ class WorldSimulationTest extends Testcase
                 return reset($elements);
             }));
         return [
-            new DieFromStarvationRule,
-            new DieFromOvercrowdingRule,
-            new SurviveRule,
+            new EvolutionRules\DieFromStarvation,
+            new EvolutionRules\DieFromOvercrowding,
+            new EvolutionRules\Survive,
             $giveBirthRule,
         ];
     }

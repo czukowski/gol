@@ -1,12 +1,12 @@
 <?php
-namespace Cz\GoL;
+namespace Cz\GoL\EvolutionRules;
 
 /**
- * GiveBirthRule
+ * GiveBirth
  *
  * @author  czukowski
  */
-class GiveBirthRule implements EvolutionRuleInterface
+class GiveBirth implements EvolutionRuleInterface
 {
     /**
      * @var  integer

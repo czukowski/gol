@@ -3,20 +3,20 @@ namespace Cz\GoL;
 
 require __DIR__.'/../vendor/autoload.php';
 
-$source = new XMLWorldReader(__DIR__.'/small-world.xml');
-$destination = new XMLWorldWriter(__DIR__.'/out.xml');
-$logger = new EchoWorldWriter;
+$source = new IO\XMLWorldReader(__DIR__.'/small-world.xml');
+$destination = new IO\XMLWorldWriter(__DIR__.'/out.xml');
+$logger = new IO\EchoWorldWriter;
 $world = new WorldSpace;
 $world->load($source);
 $world->save($logger, 0);
 
 $evolutionRules = [
-    new DieFromStarvationRule,
-    new DieFromOvercrowdingRule,
-    new SurviveRule,
-    new GiveBirthRule,
+    new EvolutionRules\DieFromStarvation,
+    new EvolutionRules\DieFromOvercrowding,
+    new EvolutionRules\Survive,
+    new EvolutionRules\GiveBirth,
 ];
-$simulation = new WorldSimulation(new NeighborsFrom8Points, $evolutionRules);
+$simulation = new WorldSimulation(new NeighborsLocation\From8Points, $evolutionRules);
 $simulation->iterateWorld(
     $world,
     $source->getNumberOfIterations(),

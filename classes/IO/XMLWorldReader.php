@@ -1,6 +1,7 @@
 <?php
-namespace Cz\GoL;
-use SimpleXMLElement;
+namespace Cz\GoL\IO;
+use Cz\GoL\Organism,
+    SimpleXMLElement;
 
 /**
  * XMLWorldReader

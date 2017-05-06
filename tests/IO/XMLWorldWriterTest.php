@@ -1,6 +1,8 @@
 <?php
-namespace Cz\GoL;
-use RuntimeException,
+namespace Cz\GoL\IO;
+use Cz\GoL\Organism,
+    Cz\GoL\Testcase,
+    RuntimeException,
     Vfs\FileSystem,
     Vfs\FileSystemInterface;
 

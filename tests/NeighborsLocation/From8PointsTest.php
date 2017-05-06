@@ -1,19 +1,20 @@
 <?php
-namespace Cz\GoL;
+namespace Cz\GoL\NeighborsLocation;
+use Cz\GoL\Testcase;
 
 /**
- * NeighborsFrom8Points
+ * From8Points
  * 
  * @author  czukowski
  */
-class NeighborsFrom8PointsTest extends Testcase
+class From8PointsTest extends Testcase
 {
     /**
      * @dataProvider  provideGetNeighborsOf
      */
     public function testGetNeighborsOf($cells, $x, $y, $expected)
     {
-        $object = new NeighborsFrom8Points;
+        $object = new From8Points;
         $world = $this->createReadOnlyWorld($cells);
         $actual = $object->getNeighborsOf($world, $x, $y);
         $this->assertSame($expected, $actual);

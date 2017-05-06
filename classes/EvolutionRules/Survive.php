@@ -1,12 +1,12 @@
 <?php
-namespace Cz\GoL;
+namespace Cz\GoL\EvolutionRules;
 
 /**
- * SurviveRule
+ * Survive
  *
  * @author  czukowski
  */
-class SurviveRule implements EvolutionRuleInterface
+class Survive implements EvolutionRuleInterface
 {
     /**
      * @param   integer  $currentOccupant

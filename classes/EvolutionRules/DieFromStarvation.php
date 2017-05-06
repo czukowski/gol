@@ -1,12 +1,12 @@
 <?php
-namespace Cz\GoL;
+namespace Cz\GoL\EvolutionRules;
 
 /**
- * DieFromStarvationRule
+ * DieFromStarvation
  * 
  * @author  ksustov
  */
-class DieFromStarvationRule implements EvolutionRuleInterface
+class DieFromStarvation implements EvolutionRuleInterface
 {
     /**
      * @var  integer

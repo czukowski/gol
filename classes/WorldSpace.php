@@ -1,6 +1,8 @@
 <?php
 namespace Cz\GoL;
-use InvalidArgumentException,
+use Cz\GoL\IO\WorldReaderInterface,
+    Cz\GoL\IO\WorldWriterInterface,
+    InvalidArgumentException,
     LogicException;
 
 /**

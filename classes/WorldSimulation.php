@@ -1,6 +1,7 @@
 <?php
 namespace Cz\GoL;
-use InvalidArgumentException;
+use Cz\GoL\NeighborsLocation\NeighborsInterface,
+    InvalidArgumentException;
 
 /**
  * WorldSimulation

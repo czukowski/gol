@@ -1,12 +1,12 @@
 <?php
-namespace Cz\GoL;
+namespace Cz\GoL\EvolutionRules;
 
 /**
- * DieFromOvercrowdingRule
+ * DieFromOvercrowding
  * 
  * @author  czukowski
  */
-class DieFromOvercrowdingRule implements EvolutionRuleInterface
+class DieFromOvercrowding implements EvolutionRuleInterface
 {
     /**
      * @var  integer

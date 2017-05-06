@@ -1,5 +1,7 @@
 <?php
-namespace Cz\GoL;
+namespace Cz\GoL\NeighborsLocation;
+use Cz\GoL\Testcase,
+    Cz\GoL\WorldSpace;
 
 /**
  * BinaryNeighborCounterTest

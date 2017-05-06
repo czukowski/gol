@@ -1,12 +1,13 @@
 <?php
-namespace Cz\GoL;
+namespace Cz\GoL\NeighborsLocation;
+use Cz\GoL\WorldSpace;
 
 /**
- * NeighborsFrom8Points
+ * From8Points
  * 
  * @author  czukowski
  */
-class NeighborsFrom8Points extends BinaryNeighborCounter
+class From8Points extends BinaryNeighborCounter
 {
     /**
      * @param   WorldSpace  $world

@@ -1,5 +1,5 @@
 <?php
-namespace Cz\GoL;
+namespace Cz\GoL\IO;
 use SimpleXMLElement;
 
 /**

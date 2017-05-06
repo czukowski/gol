@@ -1,5 +1,7 @@
 <?php
-namespace Cz\GoL;
+namespace Cz\GoL\IO;
+use Cz\GoL\Organism,
+    Cz\GoL\Testcase;
 
 /**
  * Description of XMLWorldReaderTest
