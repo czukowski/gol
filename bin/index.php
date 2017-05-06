@@ -10,7 +10,13 @@ $world = new WorldSpace;
 $world->load($source);
 $world->save($logger, 0);
 
-$simulation = new WorldSimulation(new NeighborsFrom8Points);
+$evolutionRules = [
+    new DieFromStarvationRule,
+    new DieFromOvercrowdingRule,
+    new SurviveRule,
+    new GiveBirthRule,
+];
+$simulation = new WorldSimulation(new NeighborsFrom8Points, $evolutionRules);
 $simulation->iterateWorld(
     $world,
     $source->getNumberOfIterations(),

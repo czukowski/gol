@@ -10,15 +10,21 @@ use InvalidArgumentException;
 class WorldSimulation
 {
     /**
+     * @var  array
+     */
+    private $evolutionRules;
+    /**
      * @var  NeighborsInterface
      */
     private $neighborsLocator;
 
     /**
      * @param  NeighborsInterface  $neighborsLocator
+     * @param  array               $evolutionRules
      */
-    public function __construct(NeighborsInterface $neighborsLocator)
+    public function __construct(NeighborsInterface $neighborsLocator, array $evolutionRules)
     {
+        $this->evolutionRules = $evolutionRules;
         $this->neighborsLocator = $neighborsLocator;
     }
 
@@ -79,35 +85,13 @@ class WorldSimulation
     {
         $type = $world->getAt($x, $y);
         $neighborCounts = $this->neighborsLocator->getNeighborCountsOf($world, $x, $y);
-        $sameTypeNeighborsCount = isset($neighborCounts[$type]) ? $neighborCounts[$type] : 0;
-        if ($type && ($sameTypeNeighborsCount < 2 || $sameTypeNeighborsCount > 3)) {
-            // Will die due to either isolation or overcrowding.
-            return 0;
-        } elseif ($type) {
-            // Will survive.
-            return NULL;
-        }
-        // Currently empty cell, see if we can move in some new child.
-        $eligibleToGiveBirth = [];
-        foreach ($neighborCounts as $type => $count) {
-            if ($type && $count === 3) {
-                $eligibleToGiveBirth[] = $type;
+        foreach ($this->evolutionRules as $rule) {
+            $outcome = $rule->evolve($type, $neighborCounts);
+            if ($outcome !== FALSE) {
+                return $outcome;
             }
-        }
-        if ($eligibleToGiveBirth) {
-            return $this->resolveBirthRights($eligibleToGiveBirth);
         }
         // Otherwise no change.
         return NULL;
-    }
-
-    /**
-     * @param   array  $allEligible
-     * @return  integer
-     */
-    protected function resolveBirthRights(array $allEligible)
-    {
-        shuffle($allEligible);
-        return reset($allEligible);
     }
 }

@@ -23,15 +23,8 @@ class WorldSimulationTest extends Testcase
             ->setValue($world, max(array_map(function ($row) { return max($row); }, $cells)));
         $this->getObjectProperty($world, 'initialized')
             ->setValue($world, TRUE);
-        $object = $this->getMockBuilder(WorldSimulation::class)
-            ->setMethods(['resolveBirthRights'])
-            ->setConstructorArgs([new NeighborsFrom8Points])
-            ->getMock();
-        $object->expects($this->any())
-            ->method('resolveBirthRights')
-            ->will($this->returnCallback(function (array $elements) {
-                return reset($elements);
-            }));
+        $evolutionRules = $this->createDefaultEvolutionRules($this->any());
+        $object = $this->createObject(new NeighborsFrom8Points, $evolutionRules);
         $object->iterateWorld($world, $numberOfIterations);
         $actual = $this->getObjectProperty($world, 'cells')
             ->getValue($world);
@@ -197,9 +190,9 @@ class WorldSimulationTest extends Testcase
     }
 
     /**
-     * @dataProvider  provideEvolveWorldAt
+     * @dataProvider  provideEvolveWorldAtIntegration
      */
-    public function testEvolveWorldAt($x, $y, $type, $neighborCounts, $expected)
+    public function testEvolveWorldAtIntegration($x, $y, $type, $neighborCounts, $expected)
     {
         $world = $this->createMock(WorldSpace::class);
         $world->expects($this->any())
@@ -211,21 +204,16 @@ class WorldSimulationTest extends Testcase
             ->method('getNeighborCountsOf')
             ->with($world, $x, $y)
             ->will($this->returnValue($neighborCounts));
-        $object = $this->getMockBuilder(WorldSimulation::class)
-            ->setConstructorArgs([$neighborsLocator])
-            ->setMethods(['resolveBirthRights'])
-            ->getMock();
-        $object->expects($type === 0 && $expected !== NULL ? $this->once() : $this->never())
-            ->method('resolveBirthRights')
-            ->will($this->returnCallback(function (array $elements) {
-                return reset($elements);
-            }));
+        $evolutionRules = $this->createDefaultEvolutionRules(
+            $type === 0 && $expected !== NULL ? $this->once() : $this->never()
+        );
+        $object = $this->createObject($neighborsLocator, $evolutionRules);
         $actual = $this->getObjectMethod($object, 'evolveWorldAt')
             ->invoke($object, $world, $x, $y);
         $this->assertSame($expected, $actual);
     }
 
-    public function provideEvolveWorldAt()
+    public function provideEvolveWorldAtIntegration()
     {
         return [
             [0, 0, 1, [0 => 2], 0],             // 1 dies out.
@@ -245,11 +233,35 @@ class WorldSimulationTest extends Testcase
     }
 
     /**
+     * @return  array
+     */
+    private function createDefaultEvolutionRules($giveBirthExpectation)
+    {
+        // One rule is mocked to avoid probability function in tests.
+        // The respective tests will set the correct return values.
+        $giveBirthRule = $this->getMockBuilder(GiveBirthRule::class)
+            ->setMethods(['resolveBirthRights'])
+            ->getMock();
+        $giveBirthRule->expects($giveBirthExpectation)
+            ->method('resolveBirthRights')
+            ->will($this->returnCallback(function (array $elements) {
+                return reset($elements);
+            }));
+        return [
+            new DieFromStarvationRule,
+            new DieFromOvercrowdingRule,
+            new SurviveRule,
+            $giveBirthRule,
+        ];
+    }
+
+    /**
      * @param   NeighborsInterface  $neighborsLocator
+     * @param   array               $evolutionRules
      * @return  WorldSimulation
      */
-    private function createObject(NeighborsInterface $neighborsLocator)
+    private function createObject(NeighborsInterface $neighborsLocator, array $evolutionRules = [])
     {
-        return new WorldSimulation($neighborsLocator);
+        return new WorldSimulation($neighborsLocator, $evolutionRules);
     }
 }
