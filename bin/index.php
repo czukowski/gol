@@ -10,7 +10,7 @@ $world = new WorldSpace;
 $world->load($source);
 $world->save($logger, 0);
 
-$simulation = new WorldSimulation;
+$simulation = new WorldSimulation(new NeighborsFrom8Points);
 $simulation->iterateWorld(
     $world,
     $source->getNumberOfIterations(),

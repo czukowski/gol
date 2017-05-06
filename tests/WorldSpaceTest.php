@@ -14,7 +14,7 @@ class WorldSpaceTest extends Testcase
     /**
      * @var  array
      */
-    private static $smallWorld = [
+    protected static $smallWorld = [
         [0, 0, 0, 0, 1],
         [0, 0, 0, 1, 0],
         [0, 0, 1, 0, 0],

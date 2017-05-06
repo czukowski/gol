@@ -10,6 +10,19 @@ use InvalidArgumentException;
 class WorldSimulation
 {
     /**
+     * @var  NeighborsInterface
+     */
+    private $neighborsLocator;
+
+    /**
+     * @param  NeighborsInterface  $neighborsLocator
+     */
+    public function __construct(NeighborsInterface $neighborsLocator)
+    {
+        $this->neighborsLocator = $neighborsLocator;
+    }
+
+    /**
      * @param   WorldSpace  $world
      * @param   integer     $numberOfIterations
      * @param   callable    $onIteration
@@ -65,7 +78,7 @@ class WorldSimulation
     protected function evolveWorldAt(WorldSpace $world, $x, $y)
     {
         $type = $world->getAt($x, $y);
-        $neighborCounts = $this->getNeighborCountsOf($world, $x, $y);
+        $neighborCounts = $this->neighborsLocator->getNeighborCountsOf($world, $x, $y);
         $sameTypeNeighborsCount = isset($neighborCounts[$type]) ? $neighborCounts[$type] : 0;
         if ($type && ($sameTypeNeighborsCount < 2 || $sameTypeNeighborsCount > 3)) {
             // Will die due to either isolation or overcrowding.
@@ -86,62 +99,6 @@ class WorldSimulation
         }
         // Otherwise no change.
         return NULL;
-    }
-
-    /**
-     * @param   WorldSpace  $world
-     * @param   integer     $x
-     * @param   integer     $y
-     * @return  array
-     */
-    protected function getNeighborCountsOf(WorldSpace $world, $x, $y)
-    {
-        $counts = [];
-        foreach ($this->getNeighborsOf($world, $x, $y) as $neighbor) {
-            if ( ! isset($counts[$neighbor])) {
-                $counts[$neighbor] = 0;
-            }
-            $counts[$neighbor]++;
-        }
-        return $counts;
-    }
-
-    /**
-     * @param   WorldSpace  $world
-     * @param   integer     $x
-     * @param   integer     $y
-     * @return  array
-     */
-    protected function getNeighborsOf(WorldSpace $world, $x, $y)
-    {
-        $neighbors = [];
-        // 4-point neighbors.
-        if ($x > 0) {
-            $neighbors[] = $world->getAt($x - 1, $y);
-        }
-        if ($x < $world->getDimension() - 1) {
-            $neighbors[] = $world->getAt($x + 1, $y);
-        }
-        if ($y > 0) {
-            $neighbors[] = $world->getAt($x, $y - 1);
-        }
-        if ($y < $world->getDimension() - 1) {
-            $neighbors[] = $world->getAt($x, $y + 1);
-        }
-        // Additional diagonal neighbors to a total of 8-point neighbors set.
-        if ($x > 0 && $y > 0) {
-            $neighbors[] = $world->getAt($x - 1, $y - 1);
-        }
-        if ($x < $world->getDimension() - 1 && $y > 0) {
-            $neighbors[] = $world->getAt($x + 1, $y - 1);
-        }
-        if ($x > 0 && $y < $world->getDimension() - 1) {
-            $neighbors[] = $world->getAt($x - 1, $y + 1);
-        }
-        if ($x < $world->getDimension() - 1 && $y < $world->getDimension() - 1) {
-            $neighbors[] = $world->getAt($x + 1, $y + 1);
-        }
-        return $neighbors;
     }
 
     /**
