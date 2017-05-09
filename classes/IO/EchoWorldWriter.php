@@ -17,17 +17,28 @@ class EchoWorldWriter implements WorldWriterInterface
      */
     private $charCount;
     /**
-     * @var  integer  Microseconds to wait after each print.
+     * @var  integer  
      */
-    private $sleep;
+    private $debounce;
+    /**
+     * @var  callable
+     */
+    private $printFunction;
+    /**
+     * @var  integer
+     */
+    private $totalIterations;
 
     /**
-     * @param  integer  $sleep
+     * @param  integer|NULL  $debounce         Print no more frequently than once in this amount of microseconds. Disabled if `NULL`.
+     * @param  integer|NULL  $totalIterations
      */
-    public function __construct($sleep = 500000)
+    public function __construct($debounce = NULL, $totalIterations = NULL)
     {
         $this->charCount = count($this->charCodes);
-        $this->sleep = $sleep;
+        $this->debounce = $debounce / 1000000;
+        $this->printFunction = [$this, $debounce !== NULL ? 'debouncePrint' : 'doPrint'];
+        $this->totalIterations = $totalIterations;
     }
 
     /**
@@ -38,9 +49,37 @@ class EchoWorldWriter implements WorldWriterInterface
      */
     public function write(array $organisms, $worldDimension, $numberOfIterations, $numberOfSpecies)
     {
+        call_user_func($this->printFunction, $organisms, $worldDimension, $numberOfIterations, $numberOfSpecies);
+    }
+
+    /**
+     * @param  array    $organisms
+     * @param  integer  $worldDimension
+     * @param  integer  $numberOfIterations
+     * @param  integer  $numberOfSpecies
+     */
+    protected function debouncePrint(array $organisms, $worldDimension, $numberOfIterations, $numberOfSpecies)
+    {
+        static $time;
+        $now = microtime(TRUE);
+        $delta = isset($time) ? $now - $time : 0;
+        if ($time === NULL || $delta > $this->debounce || $numberOfIterations === 0) {
+            $time = $now;
+            $this->doPrint($organisms, $worldDimension, $numberOfIterations, $numberOfSpecies);
+        }
+        return $delta;
+    }
+
+    /**
+     * @param  array    $organisms
+     * @param  integer  $worldDimension
+     * @param  integer  $numberOfIterations
+     * @param  integer  $numberOfSpecies
+     */
+    protected function doPrint(array $organisms, $worldDimension, $numberOfIterations, $numberOfSpecies)
+    {
         $message = $this->composeMessage($organisms, $worldDimension, $numberOfIterations, $numberOfSpecies);
         $this->printMessage($message);
-        usleep($this->sleep);
     }
 
     /**
@@ -52,6 +91,7 @@ class EchoWorldWriter implements WorldWriterInterface
      */
     private function composeMessage(array $organisms, $worldDimension, $numberOfIterations, $numberOfSpecies)
     {
+        $currentIteration = $this->totalIterations - $numberOfIterations;
         $cells = array_fill(0, $worldDimension, array_fill(0, $worldDimension, 0));
         foreach ($organisms as $organism) {
             $cells[$organism->y][$organism->x] = $organism->type;
@@ -66,7 +106,7 @@ class EchoWorldWriter implements WorldWriterInterface
             );
             $lines[] = implode('', $asciid);
         }
-        array_unshift($lines, "Iteration #$numberOfIterations");
+        array_unshift($lines, "Iteration #$currentIteration");
         if ($numberOfSpecies > $this->charCount) {
             array_unshift($lines, "Warning: not enough ASCII chars configured to cover all $numberOfSpecies species types!");
         }
