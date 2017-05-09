@@ -3,6 +3,7 @@ namespace Cz\GoL;
 
 require __DIR__.'/../vendor/autoload.php';
 
+// Set up in and out files.
 $source = new IO\XMLWorldReader(__DIR__.'/small-world.xml');
 $destination = new IO\XMLWorldWriter(__DIR__.'/out.xml');
 
@@ -17,10 +18,14 @@ if ($pause <= 0) {
     $pause = NULL;
 }
 
+// Create output to screen.
 $logger = new IO\EchoWorldWriter($debounce, $source->getNumberOfIterations());
+
+// Set up initial world state.
 $world = new WorldSpace;
 $world->load($source);
 
+// Set up simulation rules.
 $evolutionRules = [
     new EvolutionRules\DieFromStarvation,
     new EvolutionRules\DieFromOvercrowding,
@@ -28,6 +33,8 @@ $evolutionRules = [
     new EvolutionRules\GiveBirth,
 ];
 $simulation = new WorldSimulation(new NeighborsLocation\From8Points, $evolutionRules);
+
+// Run simulation for a number of iterations.
 $simulation->iterateWorld(
     $world,
     $source->getNumberOfIterations(),
@@ -39,4 +46,5 @@ $simulation->iterateWorld(
     }
 );
 
+// Save the outcome to the destination file.
 $world->save($destination, 0);
