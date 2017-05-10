@@ -25,6 +25,23 @@ abstract class Testcase extends PHPUnit_Framework_TestCase
     ];
 
     /**
+     * @param  array  $expected
+     * @param  array  $actual
+     */
+    protected function assertOrganismsList($expected, $actual)
+    {
+        $this->assertSame(count($expected), count($actual), 'Organisms count');
+        for ($i = 0; $i < count($expected); $i++) {
+            list ($x, $y, $type) = $expected[$i];
+            $num = $i + 1;
+            $this->assertInstanceOf(Organism::class, $actual[$i]);
+            $this->assertSame($x, $actual[$i]->x, "Organism #$num x position");
+            $this->assertSame($y, $actual[$i]->y, "Organism #$num y position");
+            $this->assertSame($type, $actual[$i]->type, "Organism #$num species type");
+        }
+    }
+
+    /**
      * @param   array  $cells
      * @return  WorldSpace
      */

@@ -53,14 +53,7 @@ class XMLWorldReaderTest extends Testcase
     {
         $object = $this->createObject($file);
         $actual = $object->getOrganismsList();
-        $this->assertSame(count($expected), count($actual), 'Organisms count');
-        for ($i = 0; $i < count($expected); $i++) {
-            list ($x, $y, $type) = $expected[$i];
-            $this->assertInstanceOf(Organism::class, $actual[$i]);
-            $this->assertSame($x, $actual[$i]->x, "Organism #$i x position");
-            $this->assertSame($y, $actual[$i]->y, "Organism #$i y position");
-            $this->assertSame($type, $actual[$i]->type, "Organism #$i species type");
-        }
+        $this->assertOrganismsList($expected, $actual);
     }
 
     public function provideGetOrganismsList()
