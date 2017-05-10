@@ -11,7 +11,7 @@ class EchoWorldWriter implements WorldWriterInterface
     /**
      * @var  array
      */
-    private $charCodes = [176, 177, 178, 219, 244, 245, 184, 185, 206, 225, 64, 35, 36, 37, 38];
+    private $charCodes = [176, 178, 177, 219, 244, 245, 184, 185, 206, 225, 64, 35, 36, 37, 38];
     /**
      * @var  integer
      */
