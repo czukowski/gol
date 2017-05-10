@@ -28,7 +28,7 @@ class GiveBirth implements EvolutionRuleInterface
      */
     public function evolve($currentOccupant, array $neighborCounts)
     {
-        // Currently empty cell, see if we can move in some new child.
+        // Create a list of species types with that can give birth to this cell.
         $eligibleToGiveBirth = [];
         foreach ($neighborCounts as $type => $count) {
             if ($type && $count === $this->exactNeighborsToGiveBirth) {
@@ -36,8 +36,10 @@ class GiveBirth implements EvolutionRuleInterface
             }
         }
         if ($eligibleToGiveBirth) {
+            // If there are any candidates, select one randomly.
             return $this->resolveBirthRights($eligibleToGiveBirth);
         }
+        // Skip to next rule.
         return FALSE;
     }
 

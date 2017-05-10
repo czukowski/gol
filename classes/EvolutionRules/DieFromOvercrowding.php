@@ -32,8 +32,10 @@ class DieFromOvercrowding implements EvolutionRuleInterface
             ? $neighborCounts[$currentOccupant]
             : 0;
         if ($currentOccupant && $sameTypeNeighborsCount > $this->maxNeighborsBeforeOvercrowded) {
+            // Die if there is an occupant and is surrounded by too many neighbors of the same type.
             return 0;
         }
+        // Skip to next rule.
         return FALSE;
     }
 }

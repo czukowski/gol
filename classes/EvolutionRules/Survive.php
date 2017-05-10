@@ -16,8 +16,10 @@ class Survive implements EvolutionRuleInterface
     public function evolve($currentOccupant, array $neighborCounts)
     {
         if ($currentOccupant) {
+            // No change if there is an occupant (it survives).
             return NULL;
         }
+        // Skip to next rule.
         return FALSE;
     }
 }

@@ -32,8 +32,10 @@ class DieFromStarvation implements EvolutionRuleInterface
             ? $neighborCounts[$currentOccupant]
             : 0;
         if ($currentOccupant && $sameTypeNeighborsCount < $this->minNeighborsToSurvive) {
+            // Die if there is an occupant and is surrounded by too little neighbors of the same type.
             return 0;
         }
+        // Skip to next rule.
         return FALSE;
     }
 }
