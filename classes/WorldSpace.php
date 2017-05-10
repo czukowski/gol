@@ -150,7 +150,7 @@ class WorldSpace
                 $letter = $i === 0 ? 'X' : 'Y';
                 $message = $message ? : "Invalid position";
                 $width = $this->worldDimension - 1;
-                throw new InvalidArgumentException("$message, allowed $letter range is [0..$width]");
+                throw new InvalidArgumentException("$message, allowed $letter range is [0..$width], got $position");
             }
         }
     }
