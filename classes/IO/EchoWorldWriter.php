@@ -11,7 +11,18 @@ class EchoWorldWriter implements WorldWriterInterface
     /**
      * @var  array
      */
-    private $charCodes = [176, 178, 177, 219, 244, 245, 184, 185, 206, 225, 64, 35, 36, 37, 38];
+    private $charCodes = [
+        [32, 32],
+        [219, 219],
+        [177, 177],
+        [176, 176],
+        [178, 178],
+        [60, 62],
+        [91, 93],
+        [123, 125],
+        [40, 41],
+        [174, 175],
+    ];
     /**
      * @var  integer
      */
@@ -100,7 +111,8 @@ class EchoWorldWriter implements WorldWriterInterface
         foreach ($cells as $row) {
             $asciid = array_map(
                 function ($type) {
-                    return chr($this->charCodes[$type % $this->charCount]);
+                    $i = $type % $this->charCount;
+                    return chr($this->charCodes[$i][0]).chr($this->charCodes[$i][1]);
                 },
                 $row
             );
