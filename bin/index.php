@@ -4,7 +4,7 @@ namespace Cz\GoL;
 require __DIR__.'/../vendor/autoload.php';
 
 // Set up in and out files.
-$source = new IO\XMLWorldReader(__DIR__.'/small-world.xml');
+$source = new IO\XMLWorldReader(__DIR__.'/samples/max.xml');
 $destination = new IO\XMLWorldWriter(__DIR__.'/out.xml');
 
 // Set up debouncing or pausing for a rough balancing of the echo output timing based on number of iterations.

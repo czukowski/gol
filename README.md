@@ -10,7 +10,7 @@ To run, use the following command:
 php bin/index.php
 ```
 
-The initial world state used by default is `small-world.xml`.
+The initial world seed used by default is hardcoded (for now) in `bin/index.php`.
 
 Rules
 -----
