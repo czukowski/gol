@@ -42,16 +42,16 @@ class WorldSpace
     }
 
     /**
-     * @param   integer  $x
-     * @param   integer  $y
-     * @param   integer  $type
+     * @param  integer  $x
+     * @param  integer  $y
+     * @param  integer  $type
      */
     public function setAt($x, $y, $type)
     {
         $this->checkInitialized();
         $this->checkPosition($x, $y);
         $this->checkSpeciesType($type);
-        return $this->cells[$y][$x] = $type;
+        $this->cells[$y][$x] = $type;
     }
 
     /**
