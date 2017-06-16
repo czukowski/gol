@@ -1,5 +1,6 @@
 <?php
 namespace Cz\GoL\IO;
+
 use Cz\GoL\Organism,
     RuntimeException;
 

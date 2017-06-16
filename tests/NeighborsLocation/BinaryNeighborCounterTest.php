@@ -1,5 +1,6 @@
 <?php
 namespace Cz\GoL\NeighborsLocation;
+
 use Cz\GoL\Testcase,
     Cz\GoL\WorldSpace;
 

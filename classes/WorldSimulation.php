@@ -1,5 +1,6 @@
 <?php
 namespace Cz\GoL;
+
 use Cz\GoL\NeighborsLocation\NeighborsInterface,
     InvalidArgumentException;
 

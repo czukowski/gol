@@ -1,5 +1,6 @@
 <?php
 namespace Cz\GoL;
+
 use Exception,
     PHPUnit_Framework_TestCase,
     ReflectionClass,

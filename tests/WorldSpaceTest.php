@@ -1,5 +1,6 @@
 <?php
 namespace Cz\GoL;
+
 use Cz\GoL\IO\WorldReaderInterface,
     Cz\GoL\IO\WorldWriterInterface,
     Exception,
