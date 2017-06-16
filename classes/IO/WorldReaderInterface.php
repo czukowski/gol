@@ -30,9 +30,16 @@ interface WorldReaderInterface
     function getOrganismsList();
 
     /**
-     * Reads dimension of a square "world".
+     * Reads world's height dimension.
      * 
      * @return  integer
      */
-    function getWorldDimension();
+    function getWorldHeight();
+
+    /**
+     * Reads world's width dimension.
+     * 
+     * @return  integer
+     */
+    function getWorldWidth();
 }

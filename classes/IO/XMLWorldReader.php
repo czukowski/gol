@@ -5,7 +5,9 @@ use Cz\GoL\Organism,
 
 /**
  * XMLWorldReader
- *
+ * 
+ * Only square worlds supported.
+ * 
  * @author  czukowski
  */
 class XMLWorldReader implements WorldReaderInterface
@@ -63,7 +65,23 @@ class XMLWorldReader implements WorldReaderInterface
     /**
      * @return  integer
      */
-    public function getWorldDimension()
+    public function getWorldHeight()
+    {
+        return $this->getWorldDimension();
+    }
+
+    /**
+     * @return  integer
+     */
+    public function getWorldWidth()
+    {
+        return $this->getWorldDimension();
+    }
+
+    /**
+     * @return  integer
+     */
+    private function getWorldDimension()
     {
         return intval($this->xml->world->cells);
     }

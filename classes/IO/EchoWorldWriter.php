@@ -54,56 +54,60 @@ class EchoWorldWriter implements WorldWriterInterface
 
     /**
      * @param  array    $organisms
-     * @param  integer  $worldDimension
+     * @param  integer  $worldWidth
+     * @param  integer  $worldHeight
      * @param  integer  $numberOfIterations
      * @param  integer  $numberOfSpecies
      */
-    public function write(array $organisms, $worldDimension, $numberOfIterations, $numberOfSpecies)
+    public function write(array $organisms, $worldWidth, $worldHeight, $numberOfIterations, $numberOfSpecies)
     {
-        call_user_func($this->printFunction, $organisms, $worldDimension, $numberOfIterations, $numberOfSpecies);
+        call_user_func($this->printFunction, $organisms, $worldWidth, $worldHeight, $numberOfIterations, $numberOfSpecies);
     }
 
     /**
      * @param  array    $organisms
-     * @param  integer  $worldDimension
+     * @param  integer  $worldWidth
+     * @param  integer  $worldHeight
      * @param  integer  $numberOfIterations
      * @param  integer  $numberOfSpecies
      */
-    protected function debouncePrint(array $organisms, $worldDimension, $numberOfIterations, $numberOfSpecies)
+    protected function debouncePrint(array $organisms, $worldWidth, $worldHeight, $numberOfIterations, $numberOfSpecies)
     {
         static $time;
         $now = microtime(TRUE);
         $delta = isset($time) ? $now - $time : 0;
         if ($time === NULL || $delta > $this->debounce || $numberOfIterations === 0) {
             $time = $now;
-            $this->doPrint($organisms, $worldDimension, $numberOfIterations, $numberOfSpecies);
+            $this->doPrint($organisms, $worldWidth, $worldHeight, $numberOfIterations, $numberOfSpecies);
         }
         return $delta;
     }
 
     /**
      * @param  array    $organisms
-     * @param  integer  $worldDimension
+     * @param  integer  $worldWidth
+     * @param  integer  $worldHeight
      * @param  integer  $numberOfIterations
      * @param  integer  $numberOfSpecies
      */
-    protected function doPrint(array $organisms, $worldDimension, $numberOfIterations, $numberOfSpecies)
+    protected function doPrint(array $organisms, $worldWidth, $worldHeight, $numberOfIterations, $numberOfSpecies)
     {
-        $message = $this->composeMessage($organisms, $worldDimension, $numberOfIterations, $numberOfSpecies);
+        $message = $this->composeMessage($organisms, $worldWidth, $worldHeight, $numberOfIterations, $numberOfSpecies);
         $this->printMessage($message);
     }
 
     /**
      * @param   array    $organisms
-     * @param   integer  $worldDimension
+     * @param   integer  $worldWidth
+     * @param   integer  $worldHeight
      * @param   integer  $numberOfIterations
      * @param   integer  $numberOfSpecies
      * @return  string
      */
-    private function composeMessage(array $organisms, $worldDimension, $numberOfIterations, $numberOfSpecies)
+    private function composeMessage(array $organisms, $worldWidth, $worldHeight, $numberOfIterations, $numberOfSpecies)
     {
         $currentIteration = $this->totalIterations - $numberOfIterations;
-        $cells = array_fill(0, $worldDimension, array_fill(0, $worldDimension, 0));
+        $cells = array_fill(0, $worldHeight, array_fill(0, $worldWidth, 0));
         foreach ($organisms as $organism) {
             $cells[$organism->y][$organism->x] = $organism->type;
         }

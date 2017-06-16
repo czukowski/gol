@@ -27,7 +27,11 @@ class WorldSpace
     /**
      * @var  integer
      */
-    private $worldDimension;
+    private $worldHeight;
+    /**
+     * @var  integer
+     */
+    private $worldWidth;
 
     /**
      * @param   integer  $x
@@ -57,28 +61,39 @@ class WorldSpace
     /**
      * @return  integer
      */
-    public function getDimension()
+    public function getHeight()
     {
         $this->checkInitialized();
-        return $this->worldDimension;
+        return $this->worldHeight;
+    }
+
+    /**
+     * @return  integer
+     */
+    public function getWidth()
+    {
+        $this->checkInitialized();
+        return $this->worldWidth;
     }
 
     /**
      * @param   array    $organisms
-     * @param   integer  $worldDimension
+     * @param   integer  $worldWidth
+     * @param   integer  $worldHeight
      * @param   integer  $numberOfSpecies
      * @throws  InvalidArgumentException
      */
-    public function initialize(array $organisms, $worldDimension, $numberOfSpecies)
+    public function initialize(array $organisms, $worldWidth, $worldHeight, $numberOfSpecies)
     {
-        foreach ([$worldDimension, $numberOfSpecies] as $value) {
+        foreach ([$worldWidth, $worldHeight, $numberOfSpecies] as $value) {
             if ( ! is_int($value) || $value <= 0) {
-                throw new InvalidArgumentException("Arguments 2 to 3 must be positive integers");
+                throw new InvalidArgumentException("Arguments 2 to 4 must be positive integers");
             }
         }
-        $this->worldDimension = $worldDimension;
+        $this->worldWidth = $worldWidth;
+        $this->worldHeight = $worldHeight;
         $this->numberOfSpecies = $numberOfSpecies;
-        $this->cells = array_fill(0, $worldDimension, array_fill(0, $worldDimension, 0));
+        $this->cells = array_fill(0, $worldHeight, array_fill(0, $worldWidth, 0));
         foreach ($organisms as $i => $organism) {
             if ( ! $organism instanceof Organism) {
                 throw new InvalidArgumentException("Argument 1 must be array of Organism objects");
@@ -103,7 +118,8 @@ class WorldSpace
     {
         $this->initialize(
             $source->getOrganismsList(),
-            $source->getWorldDimension(),
+            $source->getWorldWidth(),
+            $source->getWorldHeight(),
             $source->getNumberOfSpecies()
         );
     }
@@ -116,14 +132,20 @@ class WorldSpace
     {
         $this->checkInitialized("Cannot save uninitialized world");
         $organisms = [];
-        for ($y = 0; $y < $this->worldDimension; $y++) {
-            for ($x = 0; $x < $this->worldDimension; $x++) {
+        for ($y = 0; $y < $this->worldHeight; $y++) {
+            for ($x = 0; $x < $this->worldWidth; $x++) {
                 if ($this->cells[$y][$x] > 0) {
                     $organisms[] = new Organism($x, $y, $this->cells[$y][$x]);
                 }
             }
         }
-        $destination->write($organisms, $this->worldDimension, $numberOfIterations, $this->numberOfSpecies);
+        $destination->write(
+            $organisms,
+            $this->worldWidth,
+            $this->worldHeight,
+            $numberOfIterations,
+            $this->numberOfSpecies
+        );
     }
 
     /**
@@ -145,12 +167,16 @@ class WorldSpace
      */
     private function checkPosition($x, $y, $message = NULL)
     {
-        foreach ([$x, $y] as $i => $position) {
-            if ($position < 0 || $position >= $this->worldDimension) {
-                $letter = $i === 0 ? 'X' : 'Y';
+        $axes = ['X', 'Y'];
+        $size = [$this->worldWidth, $this->worldHeight];
+        $point = [$x, $y];
+        for ($i = 0; $i < 2; $i++) {
+            $position = $point[$i];
+            if ($position < 0 || $position >= $size[$i]) {
+                $bound = $size[$i] - 1;
+                $letter = $axes[$i];
                 $message = $message ? : "Invalid position";
-                $width = $this->worldDimension - 1;
-                throw new InvalidArgumentException("$message, allowed $letter range is [0..$width], got $position");
+                throw new InvalidArgumentException("$message, allowed $letter range is [0..$bound], got $position");
             }
         }
     }

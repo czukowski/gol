@@ -18,8 +18,10 @@ class WorldSimulationTest extends Testcase
         $world = new WorldSpace;
         $this->getObjectProperty($world, 'cells')
             ->setValue($world, $cells);
-        $this->getObjectProperty($world, 'worldDimension')
+        $this->getObjectProperty($world, 'worldHeight')
             ->setValue($world, count($cells));
+        $this->getObjectProperty($world, 'worldWidth')
+            ->setValue($world, $cells ? count($cells[0]) : 0);
         $this->getObjectProperty($world, 'numberOfSpecies')
             ->setValue($world, max(array_map(function ($row) { return max($row); }, $cells)));
         $this->getObjectProperty($world, 'initialized')
@@ -147,12 +149,15 @@ class WorldSimulationTest extends Testcase
     /**
      * @dataProvider  provideIterateWorldOnce
      */
-    public function testIterateWorldOnce($dimension, $evolveCalls, $setAtCalls)
+    public function testIterateWorldOnce($width, $height, $evolveCalls, $setAtCalls)
     {
         $world = $this->createMock(WorldSpace::class);
         $world->expects($this->any())
-            ->method('getDimension')
-            ->will($this->returnValue($dimension));
+            ->method('getWidth')
+            ->will($this->returnValue($width));
+        $world->expects($this->any())
+            ->method('getHeight')
+            ->will($this->returnValue($height));
         $object = $this->getMockBuilder(WorldSimulation::class)
             ->disableOriginalConstructor()
             ->setMethods(['evolveWorldAt'])
@@ -166,7 +171,8 @@ class WorldSimulationTest extends Testcase
         }
         for ($i = 0; $i < count($setAtCalls); $i++) {
             list ($x, $y, $type) = $setAtCalls[$i];
-            $world->expects($this->at($i + 1))
+            // First two calls were to get width and height.
+            $world->expects($this->at($i + 2))
                 ->method('setAt')
                 ->with($x, $y, $type);
         }
@@ -177,11 +183,11 @@ class WorldSimulationTest extends Testcase
     {
         return [
             [
-                3,
+                5, 3,
                 [
-                    [0, 0, NULL], [1, 0, 0], [2, 0, 1],
-                    [0, 1, 0], [1, 1, 2], [2, 1, NULL],
-                    [0, 2, NULL], [1, 2, 1], [2, 2, NULL],
+                    [0, 0, NULL], [1, 0, 0], [2, 0, 1], [3, 0, NULL], [4, 0, NULL],
+                    [0, 1, 0], [1, 1, 2], [2, 1, NULL], [3, 1, NULL], [4, 1, NULL],
+                    [0, 2, NULL], [1, 2, 1], [2, 2, NULL], [3, 2, NULL], [4, 2, NULL],
                 ],
                 [
                     [1, 0, 0], [2, 0, 1], [0, 1, 0], [1, 1, 2], [1, 2, 1],

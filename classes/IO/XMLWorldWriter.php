@@ -1,6 +1,7 @@
 <?php
 namespace Cz\GoL\IO;
-use SimpleXMLElement;
+use InvalidArgumentException,
+    SimpleXMLElement;
 
 /**
  * XMLWorldWriter
@@ -23,20 +24,26 @@ class XMLWorldWriter implements WorldWriterInterface
     }
 
     /**
-     * @param  array    $organisms
-     * @param  integer  $worldDimension
-     * @param  integer  $numberOfIterations
-     * @param  integer  $numberOfSpecies
+     * @param   array    $organisms
+     * @param   integer  $worldWidth
+     * @param   integer  $worldHeight
+     * @param   integer  $numberOfIterations
+     * @param   integer  $numberOfSpecies
+     * @throws  InvalidArgumentException
      */
-    public function write(array $organisms, $worldDimension, $numberOfIterations, $numberOfSpecies)
+    public function write(array $organisms, $worldWidth, $worldHeight, $numberOfIterations, $numberOfSpecies)
     {
-        $this->createXmlDocument($organisms, $worldDimension, $numberOfIterations, $numberOfSpecies)
+        if ($worldWidth !== $worldHeight) {
+            throw new InvalidArgumentException('XML format supports only square worlds');
+        }
+        $this->createXmlDocument($organisms, $worldWidth, $numberOfIterations, $numberOfSpecies)
             ->asXML($this->path);
     }
 
     /**
      * @param   array    $organismsList
-     * @param   integer  $worldDimension
+     * @param   integer  $worldWidth
+     * @param   integer  $worldHeight
      * @param   integer  $numberOfIterations
      * @param   integer  $numberOfSpecies
      * @return  SimpleXMLElement

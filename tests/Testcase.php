@@ -54,7 +54,10 @@ abstract class Testcase extends PHPUnit_Framework_TestCase
                 return $cells[$y][$x];
             }));
         $world->expects($this->any())
-            ->method('getDimension')
+            ->method('getWidth')
+            ->will($this->returnValue($cells ? count($cells[0]) : 0));
+        $world->expects($this->any())
+            ->method('getHeight')
             ->will($this->returnValue(count($cells)));
         return $world;
     }

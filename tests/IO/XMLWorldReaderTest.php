@@ -70,16 +70,18 @@ class XMLWorldReaderTest extends Testcase
     }
 
     /**
-     * @dataProvider  provideGetWorldDimension
+     * @dataProvider  provideGetWorldDimensions
      */
-    public function testGetWorldDimension($file, $expected)
+    public function testGetWorldDimensions($file, $expected)
     {
         $object = $this->createObject($file);
-        $actual = $object->getWorldDimension();
-        $this->assertSame($expected, $actual);
+        $actualWidth = $object->getWorldWidth();
+        $actualHeight = $object->getWorldHeight();
+        $this->assertSame($expected, $actualWidth);
+        $this->assertSame($expected, $actualHeight);
     }
 
-    public function provideGetWorldDimension()
+    public function provideGetWorldDimensions()
     {
         return [
             ['GoodWorld.xml', 100],

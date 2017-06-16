@@ -57,10 +57,11 @@ class WorldSimulation
      */
     public function iterateWorldOnce(WorldSpace $world)
     {
-        $worldDimension = $world->getDimension();
+        $width = $world->getWidth();
+        $height = $world->getHeight();
         $evolution = [];
-        for ($y = 0; $y < $worldDimension; $y++) {
-            for ($x = 0; $x < $worldDimension; $x++) {
+        for ($y = 0; $y < $height; $y++) {
+            for ($x = 0; $x < $width; $x++) {
                 $type = $this->evolveWorldAt($world, $x, $y);
                 // `NULL` means no change.
                 if ($type !== NULL) {

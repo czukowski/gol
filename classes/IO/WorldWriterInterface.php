@@ -10,9 +10,10 @@ interface WorldWriterInterface
 {
     /**
      * @param  array    $organisms
-     * @param  integer  $worldDimension
+     * @param  integer  $worldWidth
+     * @param  integer  $worldHeight
      * @param  integer  $numberOfIterations
      * @param  integer  $numberOfSpecies
      */
-    function write(array $organisms, $worldDimension, $numberOfIterations, $numberOfSpecies);
+    function write(array $organisms, $worldWidth, $worldHeight, $numberOfIterations, $numberOfSpecies);
 }

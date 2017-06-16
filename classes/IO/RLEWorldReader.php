@@ -148,16 +148,29 @@ class RLEWorldReader implements WorldReaderInterface
 
     /**
      * @return  integer
-     * @throws  RuntimeException
      */
-    public function getWorldDimension()
+    public function getWorldWidth()
     {
-        if ( ! isset($this->parameters['x']) || ! isset($this->parameters['y'])) {
-            throw new RuntimeException('World dimensions not found in input data');
-        } elseif ($this->parameters['x'] !== $this->parameters['y']) {
-            $actual = $this->parameters['x'].'x'.$this->parameters['y'];
-            throw new RuntimeException('This simulation supports only square worlds ('.$actual.' given)');
+        return $this->getWorldDimension('x');
+    }
+
+    /**
+     * @return  integer
+     */
+    public function getWorldHeight()
+    {
+        return $this->getWorldDimension('y');
+    }
+
+    /**
+     * @param   string  $dim
+     * @return  integer
+     */
+    private function getWorldDimension($dim)
+    {
+        if ( ! isset($this->parameters[$dim])) {
+            throw new RuntimeException("World '{$dim}' dimension not found in input data");
         }
-        return intval($this->parameters['x']);
+        return intval($this->parameters[$dim]);
     }
 }
