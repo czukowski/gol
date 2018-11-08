@@ -1,6 +1,8 @@
 <?php
 namespace Cz\GoL\IO;
 
+use League\CLImate\CLImate;
+
 /**
  * EchoWorldWriter
  * 
@@ -11,18 +13,11 @@ class EchoWorldWriter implements WorldWriterInterface
     /**
      * @var  array
      */
-    private $charCodes = [
-        [32, 32],
-        [219, 219],
-        [177, 177],
-        [176, 176],
-        [178, 178],
-        [60, 62],
-        [91, 93],
-        [123, 125],
-        [40, 41],
-        [174, 175],
-    ];
+    private $chars = ' █░▒▓■□☺☻♠♣♥♦';
+    /**
+     * @var  CLImate
+     */
+    private $climate;
     /**
      * @var  integer
      */
@@ -43,10 +38,12 @@ class EchoWorldWriter implements WorldWriterInterface
     /**
      * @param  integer|NULL  $debounce         Print no more frequently than once in this amount of microseconds. Disabled if `NULL`.
      * @param  integer|NULL  $totalIterations
+     * @param  integer|NULL  $fallbackWidth
      */
-    public function __construct($debounce = NULL, $totalIterations = NULL)
+    public function __construct($debounce = NULL, $totalIterations = NULL, $fallbackWidth = NULL)
     {
-        $this->charCount = count($this->charCodes);
+        $this->climate = new CLImate;
+        $this->charCount = strlen($this->chars);
         $this->debounce = $debounce / 1000000;
         $this->printFunction = [$this, $debounce !== NULL ? 'debouncePrint' : 'doPrint'];
         $this->totalIterations = $totalIterations;
@@ -92,90 +89,30 @@ class EchoWorldWriter implements WorldWriterInterface
      */
     protected function doPrint(array $organisms, $worldWidth, $worldHeight, $numberOfIterations, $numberOfSpecies)
     {
-        $message = $this->composeMessage($organisms, $worldWidth, $worldHeight, $numberOfIterations, $numberOfSpecies);
-        $this->printMessage($message);
-    }
+        $buffer = $this->climate->output->get('buffer');
 
-    /**
-     * @param   array    $organisms
-     * @param   integer  $worldWidth
-     * @param   integer  $worldHeight
-     * @param   integer  $numberOfIterations
-     * @param   integer  $numberOfSpecies
-     * @return  string
-     */
-    private function composeMessage(array $organisms, $worldWidth, $worldHeight, $numberOfIterations, $numberOfSpecies)
-    {
+        if ($numberOfSpecies > $this->charCount) {
+            $buffer->write("Warning: not enough ASCII chars configured to cover all $numberOfSpecies species types!\n");
+        }
+
         $currentIteration = $this->totalIterations - $numberOfIterations;
+        $buffer->write("Iteration #$currentIteration\n");
+
         $cells = array_fill(0, $worldHeight, array_fill(0, $worldWidth, 0));
         foreach ($organisms as $organism) {
             $cells[$organism->y][$organism->x] = $organism->type;
         }
-        $lines = [];
         foreach ($cells as $row) {
-            $asciid = array_map(
-                function ($type) {
-                    $i = $type % $this->charCount;
-                    return chr($this->charCodes[$i][0]).chr($this->charCodes[$i][1]);
-                },
-                $row
-            );
-            $lines[] = implode('', $asciid);
-        }
-        array_unshift($lines, "Iteration #$currentIteration");
-        if ($numberOfSpecies > $this->charCount) {
-            array_unshift($lines, "Warning: not enough ASCII chars configured to cover all $numberOfSpecies species types!");
-        }
-        return implode("\n", $lines);
-    }
-
-    /**
-     * Based on a Stackoverflow answer.
-     * 
-     * @see  http://stackoverflow.com/a/27850902
-     * 
-     * @staticvar  integer  $lastLines
-     * @param      string   $message
-     * @param      integer  $forceClearLines
-     */
-    private function printMessage($message, $forceClearLines = NULL)
-    {
-        static $lastLines = 0;
-
-        if ($forceClearLines !== NULL) {
-            $lastLines = $forceClearLines;
+            foreach ($row as $type) {
+                $buffer->write(
+                    str_repeat($this->chars[$type % $this->charCount], 2)
+                );
+            }
+            $buffer->write("\n");
         }
 
-        $termWidth = exec('tput cols', $toss, $status);
-        if ($status) {
-            $termWidth = 64;  // Arbitrary fall-back term width.
-        }
-
-        $lineCount = 0;
-        foreach (explode("\n", $message) as $line) {
-            $lineCount += count(str_split($line, $termWidth));
-        }
-
-        // Erasure MAGIC: Clear as many lines as the last output had.
-        for ($i = 0; $i < $lastLines; $i++) {
-            // Return to the beginning of the line
-            echo "\r";
-            // Erase to the end of the line
-            echo "\033[K";
-            // Move cursor Up a line
-            echo "\033[1A";
-            // Return to the beginning of the line
-            echo "\r";
-            // Erase to the end of the line
-            echo "\033[K";
-            // Return to the beginning of the line
-            echo "\r";
-            // Can be consolodated into
-            // echo "\r\033[K\033[1A\r\033[K\r";
-        }
-
-        $lastLines = $lineCount;
-
-        echo $message."\n";
+        $this->climate->clear()
+            ->out($buffer->get());
+        $buffer->clean();
     }
 }
