@@ -109,12 +109,17 @@ class EchoWorldWriter implements WorldWriterInterface
             $cells[$organism->y][$organism->x] = $organism->type;
         }
         foreach ($cells as $row) {
-            foreach ($row as $type) {
-                $this->ansi->color($this->colors[$type])
-                    ->text('  ')
-                    ->nostyle();
+            $currentType = reset($row);
+            $this->ansi->color($this->colors[$currentType]);
+            foreach ($row as $cellType) {
+                if ($currentType !== $cellType) {
+                    $this->ansi->nostyle()
+                        ->color($this->colors[$cellType]);
+                    $currentType = $cellType;
+                }
+                $this->ansi->text('  ');
             }
-            $this->ansi->lf();
+            $this->ansi->nostyle()->lf();
         }
 
         $currentIteration = $this->totalIterations - $numberOfIterations;
