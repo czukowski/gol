@@ -1,7 +1,9 @@
 <?php
 namespace Cz\GoL\IO;
 
-use League\CLImate\CLImate;
+use Bramus\Ansi\Ansi,
+    Bramus\Ansi\ControlSequences\EscapeSequences\Enums\SGR,
+    Bramus\Ansi\Writers\BufferWriter;
 
 /**
  * EchoWorldWriter
@@ -13,17 +15,29 @@ class EchoWorldWriter implements WorldWriterInterface
     /**
      * @var  array
      */
-    private $chars = ' █░▒▓■□☺☻♠♣♥♦';
-    /**
-     * @var  CLImate
-     */
-    private $climate;
+    private $colors = [
+        SGR::COLOR_BG_BLACK,
+        SGR::COLOR_BG_WHITE,
+        SGR::COLOR_BG_RED,
+        SGR::COLOR_BG_GREEN,
+        SGR::COLOR_BG_YELLOW,
+        SGR::COLOR_BG_BLUE,
+        SGR::COLOR_BG_PURPLE,
+        SGR::COLOR_BG_CYAN,
+        SGR::COLOR_BG_WHITE_BRIGHT,
+        SGR::COLOR_BG_RED_BRIGHT,
+        SGR::COLOR_BG_GREEN_BRIGHT,
+        SGR::COLOR_BG_YELLOW_BRIGHT,
+        SGR::COLOR_BG_BLUE_BRIGHT,
+        SGR::COLOR_BG_PURPLE_BRIGHT,
+        SGR::COLOR_BG_CYAN_BRIGHT,
+    ];
     /**
      * @var  integer
      */
-    private $charCount;
+    private $colorsCount;
     /**
-     * @var  integer  
+     * @var  integer
      */
     private $debounce;
     /**
@@ -38,12 +52,11 @@ class EchoWorldWriter implements WorldWriterInterface
     /**
      * @param  integer|NULL  $debounce         Print no more frequently than once in this amount of microseconds. Disabled if `NULL`.
      * @param  integer|NULL  $totalIterations
-     * @param  integer|NULL  $fallbackWidth
      */
-    public function __construct($debounce = NULL, $totalIterations = NULL, $fallbackWidth = NULL)
+    public function __construct($debounce = NULL, $totalIterations = NULL)
     {
-        $this->climate = new CLImate;
-        $this->charCount = strlen($this->chars);
+        $this->ansi = new Ansi(new BufferWriter);
+        $this->colorsCount = count($this->colors);
         $this->debounce = $debounce / 1000000;
         $this->printFunction = [$this, $debounce !== NULL ? 'debouncePrint' : 'doPrint'];
         $this->totalIterations = $totalIterations;
@@ -89,14 +102,7 @@ class EchoWorldWriter implements WorldWriterInterface
      */
     protected function doPrint(array $organisms, $worldWidth, $worldHeight, $numberOfIterations, $numberOfSpecies)
     {
-        $buffer = $this->climate->output->get('buffer');
-
-        if ($numberOfSpecies > $this->charCount) {
-            $buffer->write("Warning: not enough ASCII chars configured to cover all $numberOfSpecies species types!\n");
-        }
-
-        $currentIteration = $this->totalIterations - $numberOfIterations;
-        $buffer->write("Iteration #$currentIteration\n");
+        $this->ansi->eraseDisplay();
 
         $cells = array_fill(0, $worldHeight, array_fill(0, $worldWidth, 0));
         foreach ($organisms as $organism) {
@@ -104,15 +110,20 @@ class EchoWorldWriter implements WorldWriterInterface
         }
         foreach ($cells as $row) {
             foreach ($row as $type) {
-                $buffer->write(
-                    str_repeat($this->chars[$type % $this->charCount], 2)
-                );
+                $this->ansi->color($this->colors[$type])
+                    ->text('  ')
+                    ->nostyle();
             }
-            $buffer->write("\n");
+            $this->ansi->lf();
         }
 
-        $this->climate->clear()
-            ->out($buffer->get());
-        $buffer->clean();
+        $currentIteration = $this->totalIterations - $numberOfIterations;
+        $this->ansi->text("Iteration #$currentIteration")->lf();
+
+        if ($numberOfSpecies > $this->colorsCount) {
+            $this->ansi->text("Warning: not enough ASCII chars configured to cover all $numberOfSpecies species types!")->lf();
+        }
+
+        $this->ansi->e();
     }
 }
